@@ -1,0 +1,13 @@
+{
+	"name": "stremio-addon-Cuevana3",
+	"version": "0.0.1",
+	"description": "Cuevana3 provides the latest in the world of movies and tv shows in Latin Spanish dub or subtitled [Unofficial]",
+	"scripts": {
+		"start": "node server.js"
+	},
+	"dependencies": {
+		"axios": "^0.27.1",
+		"cuevana3": "github:carlosfdezb/cuevana3",
+		"stremio-addon-sdk": "1.1.x"
+	}
+}
