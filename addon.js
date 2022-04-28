@@ -1,4 +1,5 @@
 const { addonBuilder } = require("stremio-addon-sdk");
+const metadata = require("./metadata");
 const scrapping = require("./scrapping");
 const cuevanaapi = require("./cuevanaapi");
 const puppeteer = require('puppeteer');
@@ -49,14 +50,16 @@ builder.defineStreamHandler( async ({type, id}) => {
 	// Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/requests/defineStreamHandler.md
 
 	if (type === "movie") {
-		//const url = "https://api.cuevana3.me/ir/goto_ddh.php?h=cHdlSGU2VjczUUVPODNNUXI0UWVpTEk3SGFLbjZaWUNQdStvVGEzUGc4N1ZUN3ErYUhaV1IxYjBjcDI5MjRlWGo5OG1lb1JpZ0FWWFU1RFNyUEkvcDRDTDZOWGJhMUEzWTBRaUt6VmhuSTMrbUYvVG05b01rZFNkNEZiaGFnL3NtZlEyMDB5QUl0WnM2TXpibmJ4dWh3PT0";
+		const titles = await metadata.getTitles(id);
 
-		const movieURLs = await cuevanaapi.getMovieURLs(type,id);
+		console.log({titles});
+
+		//we need a puppeteer browser to handle some redirects and stuff from cuevana
+		const browser = await puppeteer.launch({ headless: true });
+
+		const movieURLs = await cuevanaapi.getMovieURLs(browser, titles);
 
 		let promises = [];
-
-		//we need a puppeteer browser to handle some redirects
-		const browser = await puppeteer.launch({ headless: true });
 
 		for(const language in movieURLs[0]) {
 			for (const source of movieURLs[0][language]) {
