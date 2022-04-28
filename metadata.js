@@ -1,56 +1,52 @@
-
 const axios = require('axios');
 
 //pls don't steal
 const apikey = "af3ef9949108c67d7f2bc1604ee7959d";
 
-async function getTitleFromId(type,id) {
-	try{
-		const response = await axios.get('https://v3-cinemeta.strem.io/meta/' + type + '/' + id + '.json');
-		
-		//console.log(response)
-		if (response && response.data && response.data.meta) {
-			//console.log(body.meta);
-			//console.log("title: ", response.data.meta.name);
-			return response.data.meta.name;
-		}
-	} catch(error) {
-		console.log("Error looking up title of movie", error);
-	}
+
+async function ObtenerTitulos(meta_id) {
+    /**Obtiene el titulo de una pelicula en spanish_es spanish_mx y english */
+    
+    const promises = [
+        ObtenerTituloIngles(meta_id),
+        ObtenerTitulosSpanish(meta_id),
+    ];
+
+    const resultados = await Promise.all(promises);
+
+    const titulos = resultados.reduce((acc, resultado) => {
+        Object.keys(resultado).forEach(idioma => {
+            acc[idioma] = resultado[idioma];
+        });
+        return acc;
+    }, {});
+
+    return titulos;
 }
 
+async function ObtenerTitulosSpanish(meta_id) {
+     /**Obtiene el titulo de una pelicula en spanish_es spanish_mx */
+    
+     const response = await axios.get(`https://api.themoviedb.org/3/movie/${meta_id}/translations?api_key=${apikey}`);
 
-async function getTitles(id) {
-	//returns title in mexican spanish, spain spanish and english
-	try{
-		const response = await axios.get(`https://api.themoviedb.org/3/movie/${id}/translations?api_key=${apikey}`);
-		
-		//console.log(response)
-		if (response && response.data && response.data.translations) {
-			
-			//find the spanish_mx translation
-			const spanish_mx = response.data.translations.find(translation => translation.iso_3166_1 === "MX");
+     const spanish_mx = response.data.translations.find(translation => translation.iso_3166_1 === "MX");
+ 
+     const spanish_es = response.data.translations.find(translation => translation.iso_3166_1 === "ES");
+ 
+     return {
+         spanish_mx: spanish_mx.data.title,
+         spanish_es: spanish_es.data.title,
+     };
+}
 
-			//find the spanish_es translation
-			const spanish_es = response.data.translations.find(translation => translation.iso_3166_1 === "ES");
+async function ObtenerTituloIngles(meta_id) {
+    const response = await axios.get('https://v3-cinemeta.strem.io/meta/movie/' + meta_id + '.json');
 
-			//find the english translation
-
-			const english = await getTitleFromId("movie", id);
-
-			return {
-				spanish_mx: spanish_mx.data.title,
-				spanish_es: spanish_es.data.title,
-				english: english
-			};
-			
-		}
-	} catch(error) {
-		console.log("Error looking up title of movie", error);
-	}
+	return {
+        english: response.data.meta.name,
+    };
 }
 
 module.exports = {
-    getTitleFromId,
-    getTitles,
-};
+    ObtenerTitulos
+}
