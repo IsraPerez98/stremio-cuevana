@@ -2,11 +2,17 @@ const axios = require('axios');
 const FormData = require('form-data');
 const jsdom = require("jsdom");
 
-async function ObtenerStream( url) {
+const fembed = require("./fembed");
+
+async function ObtenerStream(browser, url) {
     /**Convierte la URL de tomatomatela en un stream HTML5 utilizable por stremio */
     let embedURL = await obtenerEmbedPlayer(url);
 
-    console.log({embedURL});
+    if( (embedURL).includes('suzihaza.com') || (embedURL).includes('fembed.com') ) {
+        return fembed.generarStream(browser, url)
+    }
+
+    //console.log({embedURL});
 
     //Esto esta sacado directo del javascript del sitio
     //Se utiliza para general el stream
@@ -32,7 +38,7 @@ async function obtenerEmbedPlayer(url) {
     const url_object = new URL(url);
     const id = url_object.searchParams.get("h");
 
-    console.log({id});
+    //console.log({id});
 
     //al cargar el video se hace un llamado a esta api con una formdata incluyendo el id como url
     let bodyFormData = new FormData();
@@ -44,6 +50,12 @@ async function obtenerEmbedPlayer(url) {
         data: bodyFormData,
     });
 
+    //puede que esto retorne un video de fembed/suzihaza
+    const urlRespuesta = apiResponse.request.res.responseUrl
+    if((urlRespuesta).includes('suzihaza.com') || (urlRespuesta).includes('fembed.com')) {
+        return urlRespuesta;
+    }
+
     //console.log({apiResponse});
 
     //La api retorna un codigo HTML con otro ID de video y otro endpoint
@@ -52,7 +64,7 @@ async function obtenerEmbedPlayer(url) {
 
     const nuevoID = dom.window.document.querySelector("input").getAttribute("value");
 
-    console.log({nuevoID});
+    //console.log({nuevoID});
 
     let body2FormData = new FormData();
     body2FormData.append('url', nuevoID);

@@ -1,5 +1,5 @@
 const { JSDOM } = require( "jsdom" ); 
-const puppeteer = require('puppeteer');
+//const puppeteer = require('puppeteer');
 
 //POR ALGUNA MUY EXTRAÑA RAZON LA API RESPONDE CORRECTAMENTE SOLO CUANDO SE USA JQUERY, AXIOS NO FUNCIONA
 const { window } = new JSDOM("", {
@@ -10,7 +10,7 @@ const $ = require( "jquery" )( window );
 
 async function ObtenerStream(browser, url) {
     const fembedURL = await ObtenerLinkAPI(url);
-    console.log({fembedURL});
+    //console.log({fembedURL});
 
     const stream = await generarStream(browser, fembedURL);
 
@@ -19,6 +19,7 @@ async function ObtenerStream(browser, url) {
 
 async function generarStream(browser, fembedURL) {
     /** Carga la pagina con el player y retorna el stream de HTML5 */
+    
     const page = await browser.newPage();
     
     await page.setViewport({ width: 800, height: 600 })
@@ -27,12 +28,12 @@ async function generarStream(browser, fembedURL) {
 
     const timeout = 5000;
 
-    //wait for the player to load
+    //esperar que el video cargue
     await page.waitForSelector('svg', {timeout: timeout});
 
     //await page.screenshot({path: 'screenshot.png'});
 
-    //click on play
+    //click en play
     await page.mouse.click(400, 300, {button: 'left'});
 
     //we wait for the video to load
@@ -43,11 +44,12 @@ async function generarStream(browser, fembedURL) {
 
     const videoSrc = await page.evaluate(() => {
         return document.querySelector('.jw-video').src;
-     });
+    });
+
+    page.close();
 
     return videoSrc;
-
-
+    
 }
 
 async function ObtenerLinkAPI(url) {
@@ -71,4 +73,9 @@ async function ObtenerLinkAPI(url) {
 async function llamarAPIAJAX(id) {
 
     return $.post( "https://api.cuevana3.me/fembed/api.php", { h: id }, "json");
+}
+
+module.exports = {
+    ObtenerStream,
+    generarStream,
 }
