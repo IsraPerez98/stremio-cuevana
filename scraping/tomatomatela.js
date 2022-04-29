@@ -1,26 +1,21 @@
 const axios = require('axios');
-//const puppeteer = require('puppeteer');
+const FormData = require('form-data');
+const jsdom = require("jsdom");
 
-async function ObtenerStream(browser, url) {
+async function ObtenerStream( url) {
     /**Convierte la URL de tomatomatela en un stream HTML5 utilizable por stremio */
-    
-    //aveces la url contiene un boton de play, asi que lo saltamos
-    url = url.replace("player.php", "goto.php");
+    let embedURL = await obtenerEmbedPlayer(url);
 
-    let urlStream = await cargarPaginaStream(browser, url);
-
-    if(!urlStream) {
-        return "";
-    }
+    console.log({embedURL});
 
     //Esto esta sacado directo del javascript del sitio
     //Se utiliza para general el stream
 
-    if (urlStream.slice(-2) !== "?r") {
-        urlStream = urlStream + "&r";
+    if (embedURL.slice(-2) !== "?r") {
+        embedURL = embedURL + "&r";
     }
 
-    const file = urlStream.split('#').pop();
+    const file = embedURL.split('#').pop();
 
     checkUrl = "https://tomatomatela.com/details.php?v=" + file;
 
@@ -32,26 +27,48 @@ async function ObtenerStream(browser, url) {
     return stream;
 }
 
-async function cargarPaginaStream(browser, url) {
-    /** Carga la pagina con el player y returna la url del player */
+async function obtenerEmbedPlayer(url) {
+    //obtenemos el id del video
+    const url_object = new URL(url);
+    const id = url_object.searchParams.get("h");
 
-    //const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-        
-    await page.goto(url, {waitUntil: 'networkidle2'});
+    console.log({id});
 
-    const timeout = 5000;
+    //al cargar el video se hace un llamado a esta api con una formdata incluyendo el id como url
+    let bodyFormData = new FormData();
+    bodyFormData.append('url', id);
+    
+    const apiResponse = await axios({
+        method: 'post',
+        url: 'https://apialfa.tomatomatela.com/ir/rd.php',
+        data: bodyFormData,
+    });
 
-    //wait for the player to load
-    await page.waitForSelector('#player', {timeout: timeout});
+    //console.log({apiResponse});
 
-    const urlStream = page.url();
+    //La api retorna un codigo HTML con otro ID de video y otro endpoint
+    //Parseamos el HTML para obtener ID
+    const dom = new jsdom.JSDOM(apiResponse.data);
 
-    page.close();
+    const nuevoID = dom.window.document.querySelector("input").getAttribute("value");
 
-    return urlStream;
+    console.log({nuevoID});
+
+    let body2FormData = new FormData();
+    body2FormData.append('url', nuevoID);
+
+    const apiResponse2 = await axios({
+        method: 'post',
+        url: 'https://apialfa.tomatomatela.com/ir/redirect_ddh.php',
+        data: body2FormData,
+    });
+
+    //esta api responde desde otra pagina que contiene el reproductor
+
+    return apiResponse2.request.res.responseUrl;
 }
 
+
 module.exports = {
-    ObtenerStream,
+    ObtenerStream
 }
