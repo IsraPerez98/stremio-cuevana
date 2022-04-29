@@ -10,6 +10,10 @@ async function ObtenerURLsAPI(meta_id) {
     
     console.log(cuevanaID);
 
+    if(!cuevanaID) {
+        return [];
+    }
+
     return cuevana3.getLinks(cuevanaID);
 }
 
@@ -63,6 +67,14 @@ async function generarStreamObject(browser, idioma, url) {
 
 async function ObtenerStreams(meta_id) {
     const urls = await ObtenerURLsAPI(meta_id);
+
+    if(!urls.length) {
+        return [
+            {
+                "url": "",
+            }
+        ];
+    }
 
     // por alguna razon el paquete cuevana3 devuelve un array con un elemento, pero solo necesitamos el primero
     const urls_fixed = urls[0];

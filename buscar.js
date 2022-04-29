@@ -68,6 +68,11 @@ async function ObtenerIDCuevana(meta_id){
         return acc;
     }, []);
 
+    if(!candidatos.length) {
+        console.log("No hay resultados para: "+meta_id);
+        return "";
+    }
+
     //el buscador de cuevana es muy malo asi que comparamos los resultados con la similaridad de cada titulo para obtener el resultado correcto
 
     const bestMatches = Object.keys(titulos).map((idioma, index) => {

@@ -25,18 +25,22 @@ async function ObtenerTitulos(meta_id) {
 }
 
 async function ObtenerTitulosSpanish(meta_id) {
-     /**Obtiene el titulo de una pelicula en spanish_es spanish_mx */
+    /**Obtiene el titulo de una pelicula en spanish_es spanish_mx */
     
-     const response = await axios.get(`https://api.themoviedb.org/3/movie/${meta_id}/translations?api_key=${apikey}`);
+    const response = await axios.get(`https://api.themoviedb.org/3/movie/${meta_id}/translations?api_key=${apikey}`);
 
-     const spanish_mx = response.data.translations.find(translation => translation.iso_3166_1 === "MX");
+    const response_mx = response.data.translations.find(translation => translation.iso_3166_1 === "MX");
  
-     const spanish_es = response.data.translations.find(translation => translation.iso_3166_1 === "ES");
+    const response_es = response.data.translations.find(translation => translation.iso_3166_1 === "ES");
+
+    const spanish_mx = (response_mx && response_mx.data && response_mx.data.title) ? response_mx.data.title : "";
+
+    const spanish_es = (response_es && response_es.data && response_es.data.title) ? response_es.data.title : "";
  
-     return {
-         spanish_mx: spanish_mx.data.title,
-         spanish_es: spanish_es.data.title,
-     };
+    return {
+        spanish_mx: spanish_mx,
+        spanish_es: spanish_es,
+    };
 }
 
 async function ObtenerTituloIngles(meta_id) {
