@@ -63,7 +63,8 @@ async function generarStreamObject(browser, idioma, url) {
             "url": stream.stream,
             "description": `${idioma} - ${stream.host}`,
             behaviorHints: {
-            notWebReady: true,
+                notWebReady: true,
+                bingeGroup: `${idioma}`,
             }
         }
     } catch (error) {
