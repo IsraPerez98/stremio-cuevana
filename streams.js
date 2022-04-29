@@ -3,15 +3,28 @@ const puppeteer = require('puppeteer');
 const buscar = require("./buscar");
 const scraping = require("./scraping");
 
-async function ObtenerURLsAPI(meta_id) {
+async function ObtenerURLsAPI(type, meta_id) {
     /**Obtiene los URL disponibles para un ID especifico */
 
-    const cuevanaID = await buscar.ObtenerIDCuevana(meta_id);
+    const cuevanaID = await buscar.ObtenerIDCuevana(type, meta_id);
     
-    console.log(cuevanaID);
+    console.log({cuevanaID});
 
     if(!cuevanaID) {
         return [];
+    }
+
+    if(type === "series") {
+        const titulo = cuevanaID.split("/")[1];
+        
+        const temporada = meta_id.split(":")[1];
+        const capitulo = meta_id.split(":")[2];
+
+        const cuevanaIDSerie = `episodio/${titulo}-${temporada}x${capitulo}`;
+
+        console.log({cuevanaIDSerie});
+        
+        return cuevana3.getLinks(cuevanaIDSerie);
     }
 
     return cuevana3.getLinks(cuevanaID);
@@ -65,8 +78,8 @@ async function generarStreamObject(browser, idioma, url) {
     }
 }
 
-async function ObtenerStreams(meta_id) {
-    const urls = await ObtenerURLsAPI(meta_id);
+async function ObtenerStreams(type, meta_id) {
+    const urls = await ObtenerURLsAPI(type, meta_id);
 
     if(!urls.length) {
         return [

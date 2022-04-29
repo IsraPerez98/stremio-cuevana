@@ -11,9 +11,10 @@ const manifest = {
 	],
 	"types": [
 		"movie",
+		"series",
 	],
 	"name": "Cuevana3",
-	"description": "Cuevana3 provides the latest in the world of movies and tv shows in Latin Spanish dub or subtitled [Unofficial]. Cuevana3 provee la ultima actualidad en el mundo de peliculas y series en español latino subtituladas o en dub [No oficial].",
+	"description": "Cuevana3 provides the latest of movies and tv shows in Spanish, Latin Spanish or Subtitled [Unofficial]. Cuevana3 provee la ultima actualidad de peliculas y series en Español, Español Latino o Subtituladas [No oficial].",
 	"idPrefixes": [
 		"tt"
 	]
@@ -24,8 +25,8 @@ builder.defineStreamHandler( async ({type, id}) => {
 	console.log("request for streams: "+type+" "+id+" ");
 	// Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/requests/defineStreamHandler.md
 
-	if (type === "movie") {
-		const streamsDisponibles = await streams.ObtenerStreams(id);
+	if (type === "movie" || type === "series") {
+		const streamsDisponibles = await streams.ObtenerStreams(type, id);
 		return {streams : streamsDisponibles};
 	}
 

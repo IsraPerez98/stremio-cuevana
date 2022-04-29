@@ -41,11 +41,11 @@ async function buscar(titulo) {
     return resultados;
 }
 
-async function ObtenerIDCuevana(meta_id){
-    /**Obtiene el id de una pelicula de cuevna a partir de un Meta ID  */
+async function ObtenerIDCuevana(type, meta_id){
+    /**Obtiene el id de una pelicula de cuevana a partir de un Meta ID  */
 
     //el buscador de cuevana es bastante malo asi que necesitamos buscar el titulo en español, español latino e ingles
-    const titulos = await metadata.ObtenerTitulos(meta_id);
+    const titulos = await metadata.ObtenerTitulos(type, meta_id);
 
     const titulosSinRepetir = [...new Set(Object.values(titulos))];
 
