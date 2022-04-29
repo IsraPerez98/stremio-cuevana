@@ -23,15 +23,28 @@ async function generarStreamObject(browser, idioma, url) {
                 "url": "",
             }
         }
+
+        if(!(stream.stream)) {
+            return {
+                "url": "",
+            }
+        }
     
         console.log({
-            "url": url,
-            "stream": stream,
+            "host": stream.host,
+            "stream": stream.stream,
         });
 
+        
+        idioma = idioma.charAt(0).toUpperCase() + idioma.slice(1);
+
+        if(idioma == "Espanol") {
+            idioma = "Español";
+        }
+
         return {
-            "url": stream,
-            "description": idioma,
+            "url": stream.stream,
+            "description": `${idioma} - ${stream.host}`,
             behaviorHints: {
             notWebReady: true,
             }
@@ -57,16 +70,30 @@ async function ObtenerStreams(meta_id) {
     //utilizamos puppeteer para obtener el stream de algunas url
     const browser = await puppeteer.launch({ headless: true });
 
-    const promises = [];
+    let resultados = [];
 
-    for (const idioma in urls_fixed) {
-        const urls_idioma = urls_fixed[idioma];
-        for (const url of urls_idioma) {
-            promises.push(generarStreamObject(browser, idioma, url.url));
+    const parallel = true; //para testing
+
+    if(parallel) {
+
+        const promises = [];
+
+        for (const idioma in urls_fixed) {
+            const urls_idioma = urls_fixed[idioma];
+            for (const url of urls_idioma) {
+                promises.push(generarStreamObject(browser, idioma, url.url));
+            }
+        }
+
+        resultados = await Promise.all(promises);
+    } else {
+        for (const idioma in urls_fixed) {
+            const urls_idioma = urls_fixed[idioma];
+            for (const url of urls_idioma) {
+                resultados.push(await generarStreamObject(browser, idioma, url.url));
+            }
         }
     }
-
-    const resultados = await Promise.all(promises);
 
     browser.close();
 
