@@ -47,11 +47,15 @@ async function ObtenerIDCuevana(meta_id){
     //el buscador de cuevana es bastante malo asi que necesitamos buscar el titulo en español, español latino e ingles
     const titulos = await metadata.ObtenerTitulos(meta_id);
 
-    console.log({titulos});
+    const titulosSinRepetir = [...new Set(Object.values(titulos))];
+
+
+    console.log({titulosSinRepetir});
 
     //buscamos en cuevana con cada titulo en paralelo
-    const promises = Object.keys(titulos).map((idioma, index) => {
-        return buscar(titulos[idioma]);
+    const promises = titulosSinRepetir.map((titulo) => {
+        //console.log({titulo})
+        return buscar(titulo);
     });
 
     const resultados = await Promise.all(promises);
@@ -75,8 +79,8 @@ async function ObtenerIDCuevana(meta_id){
 
     //el buscador de cuevana es muy malo asi que comparamos los resultados con la similaridad de cada titulo para obtener el resultado correcto
 
-    const bestMatches = Object.keys(titulos).map((idioma, index) => {
-        return stringSimilarity.findBestMatch(titulos[idioma], candidatos.map(candidato => candidato.nombre)).bestMatch;
+    const bestMatches = titulosSinRepetir.map((titulo) => {
+        return stringSimilarity.findBestMatch(titulo, candidatos.map(candidato => candidato.nombre)).bestMatch;
     });
 
     //ahora debemos seleccionar el mejor resultado
