@@ -84,6 +84,7 @@ async function ObtenerStream(browser, playerURL) {
         if(error.name === 'TimeoutError') {
 
             //await page.screenshot({path: 'screenshot.png'});
+            await page.close();
             
             console.log("TimeoutError, probablemente el link este caido");
             return "";
