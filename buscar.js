@@ -1,8 +1,13 @@
 const axios = require('axios');
-const jsdom = require("jsdom");
+const cheerio = require('cheerio');
 const stringSimilarity = require("string-similarity");
 
 const metadata = require("./metadata");
+
+async function test() {
+    const busqueda = await buscar("Joker");
+    console.log(busqueda);
+}
 
 async function buscar(titulo) {
     /**Busca un titulo en cuevana y retorna los nombres con los id */
@@ -12,11 +17,37 @@ async function buscar(titulo) {
     }
 
     console.log("Buscando: "+titulo);
+    const busqueda = await axios.get(`https://ww3.cuevana3.me/?s=${titulo}`)
+
+    const $ = cheerio.load(busqueda.data);
+
+    const ul = $('main section .MovieList');
+
+    if(!ul || !ul.children) {
+        console.log("No hay resultados para: "+titulo);
+        return {};
+    }
+
+    const resultados = Array.from(ul.children()).map(li => {
+        const nombre = $(li).find('.Title').text();
+        const link = $(li).find('a').attr('href');
+        const id = link.split('/').slice(-2).join('/');
+        
+        return {
+            nombre,
+            id,
+        }
+    });
+
+    return resultados;
+
+    /*
     const busqueda = await axios.get(`https://ww3.cuevana3.me/?s=${titulo}`);
     const dom = new jsdom.JSDOM(busqueda.data);
     
     //we have to pick the ul from the dom
     const ul = dom.window.document.querySelector("main section .MovieList");
+    
 
     if(!ul || !ul.children) {
         console.log("No hay resultados para: "+titulo);
@@ -39,6 +70,7 @@ async function buscar(titulo) {
     //console.log(resultados);
 
     return resultados;
+    */
 }
 
 async function ObtenerIDCuevana(type, meta_id){

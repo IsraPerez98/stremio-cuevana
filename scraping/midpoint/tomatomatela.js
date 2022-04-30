@@ -1,6 +1,7 @@
 const axios = require('axios');
 const FormData = require('form-data');
-const jsdom = require("jsdom");
+//const jsdom = require("jsdom");
+const cheerio = require('cheerio');
 
 async function ObtenerURLPlayer(url) {
     //obtenemos el id del video
@@ -35,9 +36,15 @@ async function ObtenerURLPlayer(url) {
 
         //La api retorna un codigo HTML con otro ID de video y otro endpoint
         //Parseamos el HTML para obtener ID
+        /*
         const dom = new jsdom.JSDOM(apiResponse.data);
 
         const nuevoID = dom.window.document.querySelector("input").getAttribute("value");
+        */
+
+        const $ = cheerio.load(apiResponse.data);
+
+        const nuevoID = $('input').attr('value');
 
         //console.log({nuevoID});
 

@@ -98,7 +98,7 @@ async function ObtenerStreams(type, meta_id) {
 
     let resultados = [];
 
-    const parallel = true; //para testing
+    const parallel = true; //para debugging
 
     if(parallel) {
 
@@ -121,7 +121,7 @@ async function ObtenerStreams(type, meta_id) {
         }
     }
 
-    browser.close();
+    await browser.close();
 
     return resultados;
 }
